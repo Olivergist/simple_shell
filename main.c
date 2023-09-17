@@ -6,6 +6,9 @@
 #include "main.h"
 /**
  * main - Command line Interpreter
+ * @argc: represent the number of command
+ * @argv: array of string
+ * @env: executable file
  * Return: 0
  */
 int main(int argc, char *argv[], char **env)
