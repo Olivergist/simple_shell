@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <sys/wait.h>
 #include "main.h"
 /**
  * main - Command line Interpreter
@@ -13,41 +12,21 @@
  */
 int main(int argc, char *argv[], char **env)
 {
-	ssize_t status;
-	int i;
-	char *lineptr = NULL;
-	size_t n = sizeof(size_t) * 1024;
-	char *args[] = {"/bin/ls", NULL};
-	pid_t child_process;
+	char *buffer = NULL, *lineptr = NULL;
+	char **args;
 
 	while (argc)
 	{
-		write(1, "$ ", 2);
-		status = getline(&lineptr, &n, stdin);
-		if (status == -1)
-		{
-			free(lineptr);
-			exit(EXIT_SUCCESS);
-		}
-		lineptr[custom_strlen(lineptr) - 1] = '\0';
+		if (isatty(0) == 1)
+			write(1, "$ ", 2);
 
-		child_process = fork();
-		if (child_process == 0)
-		{
-			if (execve(lineptr, args, env) == -1)
-			{
-				perror(argv[0]);
-				free(lineptr);
-				exit(EXIT_FAILURE);
-			}
-		}
-		else
-		{
-			do {
-				waitpid(child_process, &i, WUNTRACED);
-			} while (!WIFEXITED(i) && !WIFSIGNALED(i));
-		}
+		buffer = read_line(lineptr);
+
+		args = tokenize(buffer, " ");
+		if (args != NULL)
+			child_process(argv[0], args, env, buffer);
+		free(buffer);
+		free(args);
 	}
-	free(lineptr);
 	return (0);
 }
