@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <stddef.h>
 
 /**
  * struct builtin_s - structure for builtins
@@ -31,8 +32,12 @@ int access_command2(char *_path, char *path, char *progname, char **args,
 		char **env, char *buffer);
 size_t custom_strlen(const char *str);
 void command_not_found(char *progname, char **args);
-int exit_builtin(char **args, char **env);
-int builtin(char **args, char **env);
+int exit_builtin(char *progname, char **args, char **env, char *buffer);
+int builtin(char *progname, char **args, char **env, char *buffer);
 int env_builtin(char **args, char **env);
+int cd_builtin(char **args, char **env);
+int isnumber(char *s);
+int custom_isdigit(int c);
+int custom_atoi(char *s);
 
 #endif  /* MAIN_H */

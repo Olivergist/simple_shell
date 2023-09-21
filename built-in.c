@@ -2,23 +2,28 @@
 
 /**
  * builtin - Implement exit
- * @args: line argument
+ * @progname: line argument
+ * @args: Argument V
  * @env: Environment Variables
+ * @buffer: need for strings
  * Return: 1
  */
 
-int builtin(char **args, char **env)
+int builtin(char *progname, char **args, char **env, char *buffer)
 {
 	int i;
 	builtin_t builtins[] =
 
 	{
-		{"exit", exit_builtin}, {NULL, NULL},
+		{"env", env_builtin}, {"cd", cd_builtin}, {NULL, NULL},
 	};
 
 	i = 0;
 	while (builtins[i].cmd != NULL)
 	{
+		if (strcmp(args[0], "exit") == 0)
+			return (exit_builtin(progname, args, env, buffer));
+
 		if (strcmp(builtins[i].cmd, args[0]) == 0)
 			return (builtins[i].func(args, env));
 		i++;
@@ -26,17 +31,43 @@ int builtin(char **args, char **env)
 	return (1);
 }
 /**
- * exit_builtin - This help with leaving the array
- * @args: line argument
+ * exit_builtin - Implement exit
+ * @progname: line argument
+ * @args: Argument V
  * @env: Environment Variables
- * Return: -1
+ * @buffer: need for strings
+ * Return: 1
  */
-int exit_builtin(char **args, char **env)
+int exit_builtin(char *progname, char **args, char **env, char *buffer)
 {
-	(void)args;
+	int i;
 	(void)env;
 
-	return (-1);
+	if (args[1] == NULL)
+	{
+		free(args);
+		free(buffer);
+		exit(EXIT_SUCCESS);
+	}
+
+	else if (isnumber(args[1]) == 0 && custom_atoi(args[1]) >= 0)
+	{
+		i = atoi(args[1]);
+
+		free(args);
+		free(buffer);
+		exit(i);
+	}
+	else
+	{
+		write(2, progname, custom_strlen(progname));
+		write(2, ": 1: ", 5);
+		write(2, args[0], custom_strlen(args[0]));
+		write(2, ": Illegal number: ", 18);
+		write(2, args[1], custom_strlen(args[1]));
+		write(2, "\n", 1);
+	}
+	return (0);
 }
 
 /**
@@ -58,5 +89,45 @@ int env_builtin(char __attribute__((unused))**args, char **env)
 		write(1, "\n", 2);
 		i++;
 	}
+	return (0);
+}
+
+/**
+ * cd_builtin - implementaion of env
+ * @args: arguments listed
+ * @env: environment variables
+ * Return: 0
+ */
+
+int cd_builtin(char **args, char __attribute__((unused))**env)
+{
+	const char *cur;
+	char *prev = NULL;
+
+	if (args[1] == NULL || strcmp(args[1], "~") == 0)
+	{
+		cur = getenv("HOME");
+		if (cur == NULL)
+			cur = getenv("PWD");
+	}
+
+	else if (strcmp(args[1], "-") == 0)
+	{
+		cur = getenv("_OLDPWD");
+		if (cur == NULL)
+			cur = getenv("PWD");
+	}
+	else
+		cur = args[1];
+
+	prev = getcwd(prev, 0);
+	if (chdir(cur) != 0)
+	{
+		perror("cd");
+		free(prev);
+		return (-1);
+	}
+	setenv("_OLDPWD", prev, 1);
+	free(prev);
 	return (0);
 }
