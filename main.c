@@ -8,10 +8,11 @@
  * @argc: represent the number of command
  * @argv: array of string
  * @env: executable file
- * Return: 0
+ * Return: status
  */
 int main(int argc, char *argv[], char **env)
 {
+	int status = 0;
 	char *buffer = NULL, *lineptr = NULL;
 	char **args;
 
@@ -20,13 +21,13 @@ int main(int argc, char *argv[], char **env)
 		if (isatty(0) == 1)
 			write(1, "$ ", 2);
 
-		buffer = read_line(lineptr);
+		buffer = read_line(status, lineptr);
 
-		args = tokenize(buffer, " ");
+		args = tokenize(buffer, " \t\n\r");
 		if (args != NULL)
-			child_process(argv[0], args, env, buffer);
+			status = access_command(argv[0], args, env, buffer);
 		free(buffer);
 		free(args);
 	}
-	return (0);
+	return (status);
 }
