@@ -54,7 +54,8 @@ int env_builtin(char __attribute__((unused))**args, char **env)
 		return (1);
 	while (env[i] != NULL)
 	{
-		write(1, env[i], custom_strlen(env[i]));
+		write(1, env[i], custom_strlen(env[i]) + 1);
+		write(1, "\n", 2);
 		i++;
 	}
 	return (0);
