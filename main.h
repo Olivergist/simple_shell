@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <stddef.h>
 
 /**
  * struct builtin_s - structure for builtins
